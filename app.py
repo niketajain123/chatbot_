@@ -4,6 +4,7 @@ import os
 from llm_service import query_llm
 from rag_service import rag_service
 from db_service import db_service
+from file_service import file_service
 import logging
 
 app = Flask(__name__)
@@ -21,12 +22,49 @@ def upload_document():
         return jsonify({'error': 'No files provided'}), 400
     
     try:
+        uploaded_files = []
         for file in files:
             if file.filename:
-                text = file.read().decode('utf-8')
-                metadata = {'filename': file.filename}
-                rag_service.add_document(text, metadata)
-        return jsonify({'message': f'{len(files)} file(s) uploaded successfully'})
+                # Save file
+                file_info = file_service.save_file(file)
+                
+                # Extract text based on file type
+                text = file_service.extract_text(file_info['filepath'], file_info['type'])
+                
+                if text and file_info['type'] != 'image':
+                    metadata = {
+                        'filename': file_info['original_name'],
+                        'type': file_info['type'],
+                        'size': file_info['size']
+                    }
+                    rag_service.add_document(text, metadata)
+                
+                uploaded_files.append(file_info['original_name'])
+        
+        return jsonify({
+            'message': f'{len(uploaded_files)} file(s) uploaded and processed successfully',
+            'files': uploaded_files
+        })
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/files', methods=['GET'])
+def list_files():
+    try:
+        files = file_service.list_files()
+        return jsonify({'files': files})
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/files/<filename>', methods=['DELETE'])
+def delete_file(filename):
+    try:
+        if file_service.delete_file(filename):
+            return jsonify({'message': 'File deleted successfully'})
+        else:
+            return jsonify({'error': 'File not found'}), 404
     except Exception as e:
         logging.error(f"Error: {e}")
         return jsonify({'error': str(e)}), 500
