@@ -2,46 +2,88 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ChatGPT Style Chat</title>
-    <link rel="stylesheet" href="../static/style.css"> 
+    <title>NJ's Assistant</title>
+    <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-    <div class="chat-container">
-        <div class="settings-bar">
-            <div class="left-controls">
-                <button class="clear-btn" onclick="clearChat()">🗑️ Clear Chat</button>
+    <div class="app">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" onclick="clearChat()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    New chat
+                </button>
             </div>
-            <div class="right-controls">
-                <button class="settings-btn" onclick="toggleParameters()">⚙️ Parameters</button>
+            <div class="chat-history">
+                <div id="history-list"></div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="memory-status">
+                    <span id="memory-indicator">🧠 Memory: ON</span>
+                </div>
+                <button class="clear-history-btn" onclick="clearAllHistory()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                    Clear History
+                </button>
+                <button class="theme-btn" onclick="toggleTheme()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/>
+                    </svg>
+                    <span id="theme-text">Light</span>
+                </button>
+                <button class="settings-btn" onclick="toggleParameters()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/>
+                    </svg>
+                    Settings
+                </button>
             </div>
         </div>
-        <div id="parameters" class="controls">
-            <div class="control-group">
-                <label>Temperature <span id="temp-value">0.7</span></label>
-                <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+        <div class="main-content">
+            <div id="parameters" class="parameters-panel">
+                <div class="param-group">
+                    <label>Temperature <span id="temp-value">0.7</span></label>
+                    <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                </div>
+                <div class="param-group">
+                    <label>Top P <span id="top-p-value">0.9</span></label>
+                    <input type="range" id="top-p" min="0" max="1" step="0.1" value="0.9">
+                </div>
+                <div class="param-group">
+                    <label>Top K <span id="top-k-value">50</span></label>
+                    <input type="range" id="top-k" min="1" max="100" step="1" value="50">
+                </div>
+                <div class="param-group">
+                    <label>
+                        <input type="checkbox" id="use-memory" checked>
+                        Chat Memory
+                    </label>
+                </div>
             </div>
-            <div class="control-group">
-                <label>Top P <span id="top-p-value">0.9</span></label>
-                <input type="range" id="top-p" min="0" max="1" step="0.1" value="0.9">
-            </div>
-            <div class="control-group">
-                <label>Top K <span id="top-k-value">50</span></label>
-                <input type="range" id="top-k" min="1" max="100" step="1" value="50">
+            <div id="chat-box" class="chat-box"></div>
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input type="text" id="prompt" placeholder="Message NJ's Assistant..." onkeypress="handleKeyPress(event)">
+                    <button class="attach-btn" onclick="triggerFileUpload()" title="Attach file">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 16.2a2 2 0 0 1-2.83-2.83l8.49-8.49"/>
+                        </svg>
+                    </button>
+                    <button class="send-btn" onclick="sendMessage()" id="send-button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
-        <div id="chat-box" class="chat-box"></div>
-        <div class="input-area">
-            <input type="text" id="prompt" placeholder="Type your message here..." onkeypress="handleKeyPress(event)" />
-            <div class="rag-inline">
-                <button class="rag-btn" onclick="triggerFileUpload()">🔗</button>
-                <input type="file" id="document-file" accept=".txt,.pdf,.docx,.md" multiple style="display: none;">
-                <input type="checkbox" id="use-rag" style="display: none;">
-            </div>
-            <button class="send-btn" onclick="sendMessage()">➤</button>
-        </div>
-
     </div>
+    <input type="file" id="document-file" accept=".txt,.pdf,.docx,.md" multiple style="display: none;">
+    <input type="checkbox" id="use-rag" style="display: none;">
     <script src="../static/script.js"></script>
-    
 </body>
 </html>

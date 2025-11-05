@@ -1,17 +1,110 @@
 function toggleParameters() {
     const parameters = document.getElementById('parameters');
-    const ragControls = document.getElementById('rag-controls');
     parameters.classList.toggle('show');
-    ragControls.classList.remove('show');
+}
+
+function loadHistory() {
+    fetch('/sessions')
+    .then(response => response.json())
+    .then(data => {
+        const historyList = document.getElementById('history-list');
+        historyList.innerHTML = '';
+        data.sessions.forEach(session => {
+            const messageText = session.message_count === 1 ? 'message' : 'messages';
+            historyList.innerHTML += `
+                <div class="history-item">
+                    <div class="history-content" onclick="loadSession('${session.session_id}')"> 
+                        <div class="history-prompt">${session.first_prompt.substring(0, 40)}...</div>
+                        <div class="history-meta">
+                            <span class="history-time">${new Date(session.last_timestamp).toLocaleDateString()}</span>
+                            <span class="message-count">${session.message_count} ${messageText}</span>
+                        </div>
+                    </div>
+                    <button class="delete-chat-btn" onclick="deleteSession('${session.session_id}')" title="Delete session">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </button>
+                </div>`;
+        });
+    });
+}
+
+function loadSession(sessionId) {
+    currentSessionId = sessionId;
+    fetch(`/sessions/${sessionId}`)
+    .then(response => response.json())
+    .then(data => {
+        const chatBox = document.getElementById('chat-box');
+        chatBox.innerHTML = '';
+        data.messages.forEach(msg => {
+            chatBox.innerHTML += `<div class="message user"><div class="message-content">${msg.prompt}</div></div>`;
+            chatBox.innerHTML += `<div class="message bot"><div class="message-content">${msg.response}</div></div>`;
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+}
+
+function deleteSession(sessionId) {
+    if (confirm('Delete this entire conversation?')) {
+        fetch(`/sessions/${sessionId}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                loadHistory();
+                if (currentSessionId === sessionId) {
+                    clearChat();
+                }
+            }
+        });
+    }
+}
+
+
+
+function updateMemoryStatus() {
+    const useMemory = document.getElementById('use-memory').checked;
+    const indicator = document.getElementById('memory-indicator');
+    indicator.textContent = useMemory ? '🧠 Memory: ON' : '🚫 Memory: OFF';
+    indicator.style.color = useMemory ? 'var(--accent-color)' : 'var(--text-muted)';
 }
 
 function triggerFileUpload() {
     document.getElementById('document-file').click();
 }
 
+let currentSessionId = null;
+
 function clearChat() {
     const chatBox = document.getElementById('chat-box');
-    chatBox.innerHTML = '<div class="empty-state"><h2>🤖 AI Assistant</h2><p>Start a conversation by typing a message below</p></div>';
+    chatBox.innerHTML = '<div class="empty-state"><h2>NJ\'s Assistant</h2><p>How can I help you today?</p></div>';
+    // Generate new session for new chat
+    fetch('/session', { method: 'POST' })
+    .then(response => response.json())
+    .then(data => {
+        currentSessionId = data.session_id;
+    });
+}
+
+function clearAllHistory() {
+    if (confirm('Are you sure you want to delete all chat history?')) {
+        fetch('/history', { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                loadHistory();
+                alert('History cleared successfully');
+            }
+        });
+    }
+}
+
+function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    const themeText = document.getElementById('theme-text');
+    const isLight = document.body.classList.contains('light-mode');
+    themeText.textContent = isLight ? 'Dark' : 'Light';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
 }
 
 function handleKeyPress(event) {
@@ -20,9 +113,20 @@ function handleKeyPress(event) {
     }
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     clearChat();
+    loadHistory();
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        document.getElementById('theme-text').textContent = 'Dark';
+    }
+    
+    // Initialize memory status
+    updateMemoryStatus();
+    document.getElementById('use-memory').addEventListener('change', updateMemoryStatus);
     
     document.getElementById('temperature').oninput = function() {
         document.getElementById('temp-value').textContent = this.value;
@@ -39,6 +143,16 @@ document.addEventListener('DOMContentLoaded', function() {
             uploadDocument();
         }
     };
+    
+    const promptInput = document.getElementById('prompt');
+    const sendButton = document.getElementById('send-button');
+    
+    promptInput.addEventListener('input', function() {
+        sendButton.disabled = !this.value.trim();
+    });
+    
+    // Initialize first session
+    clearChat();
 });
 
 function sendMessage() {
@@ -58,34 +172,41 @@ function sendMessage() {
         chatBox.innerHTML = '';
     }
     
-    chatBox.innerHTML += `<div class="message user">${prompt}</div>`;
-    chatBox.innerHTML += `<div class="message bot typing">Thinking...</div>`;
+    chatBox.innerHTML += `<div class="message user"><div class="message-content">${prompt}</div></div>`;
+    chatBox.innerHTML += `<div class="message bot"><div class="message-content typing">Thinking...</div></div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
 
     const useRag = document.getElementById('use-rag').checked;
+    const useMemory = document.getElementById('use-memory').checked;
     
     fetch('/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             prompt: prompt,
+            session_id: currentSessionId,
             temperature: temperature,
             top_p: topP,
             top_k: topK,
-            use_rag: useRag
+            use_rag: useRag,
+            use_memory: useMemory
         })
     })
     .then(response => response.json())
     .then(data => {
-        const messages = chatBox.querySelectorAll('.message');
+        const messages = chatBox.querySelectorAll('.message-content');
         const lastMessage = messages[messages.length - 1];
         lastMessage.textContent = data.response || data.error;
         lastMessage.classList.remove('typing');
+        if (data.session_id) {
+            currentSessionId = data.session_id;
+        }
+        loadHistory();
         chatBox.scrollTop = chatBox.scrollHeight;
         promptInput.value = '';
     })
     .catch(() => {
-        const messages = chatBox.querySelectorAll('.message');
+        const messages = chatBox.querySelectorAll('.message-content');
         const lastMessage = messages[messages.length - 1];
         lastMessage.textContent = 'Error occurred';
         lastMessage.classList.remove('typing');
