@@ -213,6 +213,8 @@ function sendMessage() {
     });
 }
 
+
+
 function uploadDocument() {
     const fileInput = document.getElementById('document-file');
     const files = fileInput.files;
@@ -248,6 +250,7 @@ function uploadDocument() {
         if (data.message) {
             fileInput.value = '';
             document.getElementById('use-rag').checked = true;
+
         }
         chatBox.scrollTop = chatBox.scrollHeight;
     })
