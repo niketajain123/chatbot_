@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatGPT Style Chat</title>
+    <link rel="stylesheet" href="../static/style.css"> 
+</head>
+<body>
+    <div class="chat-container">
+        <div class="settings-bar">
+            <div class="left-controls">
+                <button class="clear-btn" onclick="clearChat()">🗑️ Clear Chat</button>
+            </div>
+            <div class="right-controls">
+                <button class="settings-btn" onclick="toggleParameters()">⚙️ Parameters</button>
+            </div>
+        </div>
+        <div id="parameters" class="controls">
+            <div class="control-group">
+                <label>Temperature <span id="temp-value">0.7</span></label>
+                <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+            </div>
+            <div class="control-group">
+                <label>Top P <span id="top-p-value">0.9</span></label>
+                <input type="range" id="top-p" min="0" max="1" step="0.1" value="0.9">
+            </div>
+            <div class="control-group">
+                <label>Top K <span id="top-k-value">50</span></label>
+                <input type="range" id="top-k" min="1" max="100" step="1" value="50">
+            </div>
+        </div>
+        <div id="chat-box" class="chat-box"></div>
+        <div class="input-area">
+            <input type="text" id="prompt" placeholder="Type your message here..." onkeypress="handleKeyPress(event)" />
+            <div class="rag-inline">
+                <button class="rag-btn" onclick="triggerFileUpload()">🔗</button>
+                <input type="file" id="document-file" accept=".txt,.pdf,.docx,.md" multiple style="display: none;">
+                <input type="checkbox" id="use-rag" style="display: none;">
+            </div>
+            <button class="send-btn" onclick="sendMessage()">➤</button>
+        </div>
+
+    </div>
+    <script src="../static/script.js"></script>
+    
+</body>
+</html>
