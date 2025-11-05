@@ -218,6 +218,17 @@ function uploadDocument() {
     const files = fileInput.files;
     if (!files.length) return;
     
+    const chatBox = document.getElementById('chat-box');
+    const emptyState = chatBox.querySelector('.empty-state');
+    if (emptyState) {
+        chatBox.innerHTML = '';
+    }
+    
+    const fileNames = Array.from(files).map(f => f.name).join(', ');
+    chatBox.innerHTML += `<div class="message user"><div class="message-content">📎 Uploading: ${fileNames}</div></div>`;
+    chatBox.innerHTML += `<div class="message bot"><div class="message-content typing">Processing documents...</div></div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+    
     const formData = new FormData();
     for (let file of files) {
         formData.append('files', file);
@@ -229,10 +240,21 @@ function uploadDocument() {
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message || data.error);
+        const messages = chatBox.querySelectorAll('.message-content');
+        const lastMessage = messages[messages.length - 1];
+        lastMessage.textContent = data.message || data.error;
+        lastMessage.classList.remove('typing');
+        
         if (data.message) {
             fileInput.value = '';
             document.getElementById('use-rag').checked = true;
         }
+        chatBox.scrollTop = chatBox.scrollHeight;
+    })
+    .catch(() => {
+        const messages = chatBox.querySelectorAll('.message-content');
+        const lastMessage = messages[messages.length - 1];
+        lastMessage.textContent = 'Error uploading documents';
+        lastMessage.classList.remove('typing');
     });
 }
