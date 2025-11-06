@@ -10,7 +10,7 @@ pipeline{
                 checkout scm
             }
         }
-    }
+    
     stage('Build and Push') {
        steps {
           script {
@@ -41,6 +41,7 @@ pipeline{
                 sleep 30
                 helm uninstall chatbot-release-cbchart
             '''
+            }
         }
     }
 }
