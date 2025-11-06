@@ -2,6 +2,7 @@ pipeline{
     agent any
     environment{
             DOCKER_IMAGE = "niketa15jain/chatbot:latest"
+            DOCKERHUB_CREDENTIALS= 'dockerhub'
     }
 
     stages{
