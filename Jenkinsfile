@@ -33,14 +33,16 @@ pipeline{
             sh 'helm install my-chatbot chatbot/cbchart'
             sh 'kubectl get pods'
             sleep 10
+            sh 'kubectl get svc'
         }
     }
     stage('Deploying'){
         steps{
             sh '''
-                tmux new -d -s port 'kubectl port-forward svc/chatbot-release-cbchart 5000:80'
-                sleep 30
-                helm uninstall chatbot-release-cbchart
+            
+                // tmux new -d -s port 'kubectl port-forward svc/chatbot-release-cbchart 5000:80'
+                // sleep 30
+                // helm uninstall chatbot-release-cbchart
             '''
             }
         }
