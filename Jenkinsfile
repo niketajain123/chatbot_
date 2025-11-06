@@ -30,7 +30,7 @@ pipeline{
             sh 'helm repo update'
             sh 'helm search repo chatbot'
             sleep 10
-            sh 'helm install my-chatbot chatbot/cbchart'
+            sh 'helm install --upgrade my-chatbot chatbot/cbchart'
             sh 'kubectl get pods'
             sleep 10
             sh 'kubectl get svc'
