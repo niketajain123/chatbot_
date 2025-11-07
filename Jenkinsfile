@@ -5,7 +5,7 @@ pipeline{
             DOCKERHUB_CREDENTIALS= 'dockerhub'
             SONARQUBE_SERVER = "SonarQube"
             SONAR_TOKEN = credentials('sonarqube-token')
-            GEMINI_API_KEY = credentials('API_KEY')
+            
     }
 
     stages{
@@ -24,12 +24,26 @@ pipeline{
                         -Dsonar.projectName="chatbot" \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=http://localhost:9000 \
-                        -Dsoanr.token=${SONAR_TOKEN}
+                        -Dsoanr.login=${SONAR_TOKEN}
                     '''
                 }
             }
         }
-    
+
+    stage('Inject .env') {
+                steps {
+                    withCredentials([file(credentialsId: 'gemini_api_key', variable: 'ENV_FILE')]) {
+                        sh '''
+                        
+                            echo "Injecting .env file from Jenkins credentials..."
+                            cp $ENV_FILE .env
+                            ls -l .env
+                        '''
+                    }
+            }
+    }
+
+        
     stage('Build and Push') {
        steps {
           script {
