@@ -72,8 +72,8 @@ pipeline{
     stage('Deploying'){
         steps{
             sh '''            
-                tmux new -d -s port 'kubectl port-forward svc/my-chatbot-cbchart 5000:80'
-        
+                kubectl port-forward svc/my-chatbot-cbchart 5000:80
+          
             '''
             }
         }
