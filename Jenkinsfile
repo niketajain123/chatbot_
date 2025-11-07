@@ -3,7 +3,7 @@ pipeline{
     environment{
             DOCKER_IMAGE = "niketa15jain/chatbot:latest"
             DOCKERHUB_CREDENTIALS= 'dockerhub'
-            SONARQUBE_SERVER = "Sonarqube"
+            SONARQUBE_SERVER = "SonarQube"
             SONAR_TOKEN = credentials('sonarqube-token')
     }
 
