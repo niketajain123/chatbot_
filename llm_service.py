@@ -3,6 +3,7 @@ import os
 import requests
 
 API_KEY = os.getenv("GEMINI_API_KEY")
+print(API_KYE)
 BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
 def query_llm(prompt, temperature, top_p, top_k, context=None):
