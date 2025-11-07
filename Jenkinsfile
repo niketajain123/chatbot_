@@ -5,6 +5,7 @@ pipeline{
             DOCKERHUB_CREDENTIALS= 'dockerhub'
             SONARQUBE_SERVER = "SonarQube"
             SONAR_TOKEN = credentials('sonarqube-token')
+            GEMINI_API_KEY = credentials('API_KEY')
     }
 
     stages{
