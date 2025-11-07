@@ -37,6 +37,7 @@ pipeline{
                         
                             echo "Injecting .env file from Jenkins credentials..."
                             cp $ENV_FILE .env
+                            cat .env
                             ls -l .env
                         '''
                     }
