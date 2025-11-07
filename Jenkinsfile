@@ -3,12 +3,29 @@ pipeline{
     environment{
             DOCKER_IMAGE = "niketa15jain/chatbot:latest"
             DOCKERHUB_CREDENTIALS= 'dockerhub'
+            SONARQUBE_SERVER = "Sonarqube"
+            SONAR_TOKEN = credentials('sonarqube-token')
     }
 
     stages{
         stage('Cloning'){
             steps{
                 checkout scm
+            }
+        }
+
+        stage('Sonar Analysis'){
+            steps{
+                withSonarQubeEnv("${SONARQUBE_SERVER}"){
+                    sh '''
+                        sonar-scanner \ 
+                        -Dsonar.projectKey=cb-analysis \
+                        -Dsonar.projectName="chatbot" \ 
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsoanr.token=${SONAR_TOKEN}
+                    '''
+                }
             }
         }
     
