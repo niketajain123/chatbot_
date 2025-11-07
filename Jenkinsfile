@@ -18,9 +18,9 @@ pipeline{
             steps{
                 withSonarQubeEnv("${SONARQUBE_SERVER}"){
                     sh '''
-                        sonar-scanner \ 
+                        sonar-scanner \
                         -Dsonar.projectKey=cb-analysis \
-                        -Dsonar.projectName="chatbot" \ 
+                        -Dsonar.projectName="chatbot" \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=http://localhost:9000 \
                         -Dsoanr.token=${SONAR_TOKEN}
