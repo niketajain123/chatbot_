@@ -56,28 +56,6 @@ pipeline{
                 }
             }
            input message: "Wanna approve?", ok: "Merge"
-        }
-    }
-    stage('Building pods'){
-        steps{
-            sh 'helm repo add chatbot https://niketajain123.github.io/chatbot-chart'
-            sh 'helm repo update'
-            sh 'helm search repo chatbot'
-            sleep 10
-            sh 'helm upgrade --install my-chatbot chatbot/cbchart'
-            sh 'kubectl get pods'
-            sleep 10
-            sh 'kubectl get svc'
-        }
-    }
-    stage('Deploying'){
-        steps{
-            sh '''            
-                tmux new -d -s port 'kubectl port-forward svc/my-chatbot-cbchart 5000:80'
-                sleep 50
-                helm uninstall my-chatbot
-          
-            '''
             }
         }
     }
