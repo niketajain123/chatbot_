@@ -55,6 +55,7 @@ pipeline{
             docker.image("${DOCKER_IMAGE}").push()
                 }
             }
+           input message: "Wanna approve?", ok: "Merge"
         }
     }
     stage('Building pods'){
