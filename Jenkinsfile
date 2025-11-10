@@ -75,7 +75,7 @@ pipeline{
             sh '''            
                 tmux new -d -s port 'kubectl port-forward svc/my-chatbot-cbchart 5000:80'
                 sleep 50
-                helm uninstall my-chatbot
+           //   helm uninstall my-chatbot
           
             '''
             }
